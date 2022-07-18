@@ -5,6 +5,9 @@ import Button from "./common/button";
 import { Link } from "react-router-dom";
 import * as yup from "yup";
 import {Formik, Form} from 'formik';
+import axios from "axios";
+const BASE_URL = "http://localhost:4000/";
+
 export default function Signin(){
   const [formData, setFormData] = useState({
     email: "",
@@ -19,10 +22,17 @@ export default function Signin(){
 
   function submitForm(e){
     e.preventDefault();
-    // login.isValid(formData).then(result => {
-    //   console.log(result);
-    // });
-
+    axios.post(`${BASE_URL}signin`, { ...formData }).then((result) => {
+      
+      if (!result.data.status) {
+        // setisShowToaster(true);
+        // setErrorMessage(result.data.message);
+      } else {
+        sessionStorage.setItem("isUserLogged", true);
+        sessionStorage.setItem("token", result.data.token);
+        window.location.href = "/addProduct";
+      }
+    });
     
   }
 
@@ -45,36 +55,32 @@ export default function Signin(){
 
           <div className="signin-form">
             <h2 className="form-title">Sign In</h2>
-            
-                <form
-                  noValidate
-                  onSubmit={submitForm}
-                  className="register-form"
-                  id="register-form"
-                >
-                  <TextBox
-                    type="email"
-                    icon="zmdi-email"
-                    name="email"
-                    placeholder="Please enter email"
-                    value={formData.email}
-                    callbackFunction={handleChange}
-                  />
-                  <TextBox
-                    type="password"
-                    icon="zmdi-lock"
-                    name="password"
-                    value={formData.password}
-                    placeholder="Please enter password"
-                    callbackFunction={handleChange}
-                  />
+            <form
+              noValidate
+              onSubmit={submitForm}
+              className="register-form"
+              id="register-form"
+            >
+              <TextBox
+                type="email"
+                icon="user"
+                name="email"
+                placeholder="Please enter email"
+                value={formData.email}
+                callbackFunction={handleChange}
+              />
+              <TextBox
+                type="password"
+                icon="lock"
+                name="password"
+                value={formData.password}
+                placeholder="Please enter password"
+                callbackFunction={handleChange}
+              />
 
-                  <Button
-                    name="signin"
-                    className="form-submit"
-                    value="Sign In"
-                  />
-                </form>;
+              <Button name="signin" className="form-submit" value="Sign In" />
+            </form>
+            ;
           </div>
         </div>
       </div>
