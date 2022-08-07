@@ -35,7 +35,7 @@ export default function Product({data, showButton=true, callBack}){
     <div className="productBox">
       <ToastContainer />
       <div className="imageBox">
-        <img src={data.image} />
+        <img src={data.image} style={{height: '200px'}}/>
       </div>
       <div className="infoBox">
         <p className="title">{data.title}</p>
