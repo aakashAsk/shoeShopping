@@ -1,8 +1,8 @@
-export default function Button({name, className, value}){
+export default function Button({ name, className, value }) {
   return (
     <div className="form-group form-button">
       <input
-        type="submit"
+                type="submit"
         name={name}
         id={name}
         className={className}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./style.css";
 import TextBox from "./common/textBox";
 import Dropdown from "./common/dropdown";
@@ -7,6 +7,8 @@ import Button from "./common/button";
 import Footer from "./common/footer";
 import NavBar from "./common/navigationBar";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const BASE_URL = "http://localhost:4000/";
 
 export default function AddProduct() {
@@ -16,50 +18,206 @@ export default function AddProduct() {
     disPrice: "",
     quantity: "",
     mall: "",
-    brand:"",
+    brand: "",
+    retailer: "",
+    image: "",
+    color:"",
+    size:""
   });
 
-  const [tableData, setTableData] = useState([])
+  let quantityRef = useRef();
+
+  const [quantity, setQuantity] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
+  const [productId, setProductId] = useState(false);
+  const [formError, setFormError] = useState({});
+  let [productImg, setProductImg] = useState();
+
+  const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
     getAllProducts();
+    setFormData({ ...formData, retailer: sessionStorage.getItem("token") });
   }, []);
 
   function getAllProducts() {
-    axios.get(`${BASE_URL}product/getAllProducts`).then((result) => {
-      setTableData(result.data.result);
-    });
+    axios
+      .get(
+        `${BASE_URL}product/getAllProducts?userid=${sessionStorage.getItem(
+          "token"
+        )}`
+      )
+      .then((result) => {
+        setTableData(result.data.result);
+      });
   }
   function handleChange(e) {
-    console.log(e.target.value);
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  }
+
+  async function onFileChange(e) {
+    const formData = new FormData();
+    console.log(e.target.files);
+    formData.append("file", e.target.files[0]);
+    const res = await axios.post(`${BASE_URL}uploadImage`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    console.log(res.data.filePath);
+    setProductImg(`${BASE_URL}${res.data.filePath}`);
+  }
+
+  function editProduct(data) {
+    setQuantity(data.quantity);
+    setProductId(data._id);
+    setShowPopup(true);
   }
 
   function submitForm(e) {
     e.preventDefault();
-    axios
-      .post(`${BASE_URL}product/addProduct`, { ...formData })
-      .then((result) => {
-        if (!result.data.status) {
-        } else {
-          // sessionStorage.setItem("isUserLogged", true);
-          // sessionStorage.setItem("token", result.data.token);
-          // window.location.href = "/";
-          getAllProducts();
-          setFormData({
-            title: "",
-            price: "",
-            disPrice: "",
-            quantity: "",
-            mall: "",
-            brand: "",
+    let count = 0;
+    setFormError((error) => {
+      const modifiedValue = validate(formData);
+     
+      if (Object.keys(modifiedValue).length === 0 && count === 0) {
+        count++;
+        axios
+          .post(`${BASE_URL}product/addProduct`, {
+            ...formData,
+            image: productImg,
+          })
+          .then((result) => {
+            if (!result.data.status) {
+            } else {
+              // sessionStorage.setItem("isUserLogged", true);
+              // sessionStorage.setItem("token", result.data.token);
+              // window.location.href = "/";
+              getAllProducts();
+              setFormData({
+                title: "",
+                price: "",
+                disPrice: "",
+                quantity: "",
+                mall: "",
+                brand: "",
+                retailer: "",
+                image: "",
+                color: "",
+                size: "",
+              });
+            }
           });
-        }
-      });
+      }
+      return modifiedValue;
+    });
+  }
+
+  function validate(values) {
+    console.log(values);
+    const errors = {};
+    // title: "",
+    // price: "",
+    // disPrice: "",
+    // quantity: "",
+    // mall: "",
+    // brand: "",
+    // retailer: "",
+    // image: "",
+    if (!values.title) {
+      errors.title = "Please enter title";
+    } 
+
+
+    if (!values.price) {
+      errors.price = "Please enter price";
+    }
+    else if(values.price < 0){
+      errors.price = "Please enter valid price";
+    }
+
+    if (!values.size) {
+      errors.size = "Please enter size";
+    } else if (values.size < 0) {
+      errors.size = "Please enter valid size";
+    }
+
+    if (!values.disPrice) {
+      errors.disPrice = "Please enter price";
+    } else if (values.disPrice < 0) {
+      errors.disPrice = "Please enter valid price";
+    }
+
+    if (!values.quantity) {
+      errors.quantity = "Please enter quantity";
+    } else if (values.quantity < 0) {
+      errors.quantity = "Please enter valid quantity";
+    }
+
+    if (!values.brand) {
+      errors.brand = "Please enter brand";
+    } 
+
+      // if (!values.image) {
+      //   errors.image = "Please upload image";
+      // } 
+
+    if (!values.color) {
+      errors.color = "Please enter color";
+    } 
+
+    if (!values.sku) {
+      errors.sku = "Please enter sku";
+    } 
+
+    return errors;
+  }
+
+  function updateQuantity(e) {
+    e.preventDefault();
+    // let count = 0;
+    // setFormError((error) => {
+    //   const modifiedValue = validate(formData);
+    //   if (Object.keys(modifiedValue).length === 0 && count === 0) {
+    //     count++;
+        axios
+          .post(`${BASE_URL}product/updateQuantity`, { productId, quantity })
+          .then((result) => {
+            if (result.data.status) {
+              getAllProducts();
+              closePopup();
+              toast(result.data.message);
+            } else {
+              toast.error(`${result.data.message}`, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+              });
+            }
+          });
+    //   }
+    // });
+  }
+
+  function closePopup() {
+    setShowPopup(false);
+  }
+
+  function deleteProduct(id) {
+    axios.get(`${BASE_URL}product/deleteProduct?id=${id}`).then((result) => {
+      if (result.data.status) {
+        getAllProducts();
+      }
+    });
   }
   return (
     <React.Fragment>
-      <NavBar role="vender" />
+      <NavBar role="vender" activeTab="addProduct" />
+      <ToastContainer />
       <div className="main" style={{ padding: 0 }}>
         <div className="mainPage">
           <div className="card">
@@ -78,53 +236,84 @@ export default function AddProduct() {
                   placeholder="Please enter title"
                   value={formData.name}
                   callbackFunction={handleChange}
+                  error={formError.title}
                 />
 
                 <TextBox
-                  type="text"
-                  icon="inr"
+                  type="number"
+                  icon="usd"
                   name="disPrice"
                   placeholder="Please enter discount price"
-                  value={formData.name}
+                  value={formData.disPrice}
+                  callbackFunction={handleChange}
+                  error={formError.disPrice}
+                />
+
+                <TextBox
+                  type="number"
+                  icon="usd"
+                  name="price"
+                  placeholder="Please enter price"
+                  value={formData.price}
+                  error={formError.price}
                   callbackFunction={handleChange}
                 />
 
                 <TextBox
                   type="text"
-                  icon="inr"
-                  name="price"
-                  placeholder="Please enter price"
-                  value={formData.name}
+                  icon="tag"
+                  name="color"
+                  placeholder="Please enter color"
+                  value={formData.color}
+                  error={formError.color}
+                  callbackFunction={handleChange}
+                />
+
+                <TextBox
+                  type="number"
+                  icon="tag"
+                  name="size"
+                  placeholder="Please enter size"
+                  value={formData.size}
+                  error={formError.size}
+                  callbackFunction={handleChange}
+                />
+
+                <TextBox
+                  type="number"
+                  icon="cog"
+                  name="quantity"
+                  placeholder="Please enter quantity"
+                  value={formData.quantity}
+                  error={formError.quantity}
                   callbackFunction={handleChange}
                 />
 
                 <TextBox
                   type="text"
                   icon="cog"
-                  name="quantity"
-                  placeholder="Please enter quantity"
-                  value={formData.name}
+                  name="brand"
+                  placeholder="Please enter brand"
+                  value={formData.brand}
+                  error={formError.brand}
                   callbackFunction={handleChange}
                 />
 
-                <Dropdown
-                  options={[
-                    { value: "0", text: "Select Brand" },
-                    { value: "brand1", text: "Brand 1" },
-                  ]}
-                  id="brand"
-                  value={formData.name}
+                <TextBox
+                  type="text"
+                  icon="cog"
+                  name="sku"
+                  placeholder="Please enter sku"
+                  value={formData.sku}
+                  error={formError.sku}
                   callbackFunction={handleChange}
                 />
-                <Dropdown
-                  options={[
-                    { value: "0", text: "Select Mall" },
-                    { value: "mall1", text: "Mall 1" },
-                  ]}
-                  id="mall"
-                  value={formData.name}
-                  callbackFunction={handleChange}
-                />
+
+                <div className="wrapper" style={{ marginBottom: "25px" }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <input type="file" multiple onChange={onFileChange} />
+                  </div>
+                </div>
 
                 <Button
                   name="addProduct"
@@ -135,19 +324,104 @@ export default function AddProduct() {
             </div>
           </div>
 
-          {/* 
-            <Table heading={["col1", "col2", "col3"]} data={tableData} />
-           */}
-
           {tableData.length > 0 && (
             <div className="tableBox">
-              <Table data={tableData} />
+              {/* <Table data={tableData} columns={[{"title": 'Title'}, {'price': 'Price'}, {'disPrice': 'Discount Price'}, {'brand': 'Brand'}, {'quantity': 'Quantity'}, {operation: 'Operation'}]} /> */}
+              <table>
+                <tr>
+                  <td>ProductId</td>
+                  <td>ProductId</td>
+                  <td>Title</td>
+                  <td>Price</td>
+                  <td>Discount Price</td>
+                  <td>Brand</td>
+                  <td>Quantity</td>
+                  <td>Operation</td>
+                </tr>
+                {tableData.map((i, j) => {
+                  return (
+                    <tr key={j}>
+                      <td>{i.ProductId}</td>
+                      <td>
+                        <img src={i.image} style={{ width: "100px" }} />
+                      </td>
+                      <td>{i.title}</td>
+                      <td>{i.price}</td>
+                      <td>{i.disPrice}</td>
+                      <td>{i.brand}</td>
+                      <td>{i.quantity}</td>
+                      <td>
+                        <div className="operationBox">
+                          <button onClick={() => editProduct(i)}>
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                          </button>
+                          <button onClick={() => deleteProduct(i._id)}>
+                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </table>
             </div>
           )}
         </div>
 
         <Footer />
       </div>
+
+      {showPopup ? (
+        <div className="popupWrapper">
+          <div className="popup">
+            <div className="formWrapper">
+              <span className="closeIcon" onClick={() => closePopup()}>
+                &#xD7;
+              </span>
+              <h1>Update Quantity</h1>
+              <form
+                noValidate
+                onSubmit={updateQuantity}
+                className="register-form"
+                id="register-form"
+              >
+                {/* <TextBox
+                  type="nummber"
+                  icon="tag"
+                  
+                  name="quantity"
+                  placeholder="Please enter quantity"
+                  value={quantity}
+                  callbackFunction={handleChange}
+                /> */}
+                <div className="wrapper" style={{ marginBottom: "25px" }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label htmlFor="quantity">
+                      {/* <i className={`zmdi material-icons-name ${icon}`}></i> */}
+                      {/* <i class={`fa fa-${icon}`} aria-hidden="true"></i> */}
+                    </label>
+                    <input
+                      type="number"
+                      ref={quantityRef}
+                      name="quantity"
+                      value={quantity}
+                      id="quantity"
+                      placeholder="Please enter quantity"
+                      onChange={(e) => setQuantity(e.target.value)}
+                    />
+                  </div>
+                  {/* <span className="error">{error}</span> */}
+                </div>
+                <Button
+                  name="quantityUpdate"
+                  className="form-submit"
+                  value="Update Quantity"
+                />
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </React.Fragment>
   );
 }

@@ -8,7 +8,6 @@ mongoose.connect(`${process.env.MONGO_URL}`,
    console.log("Database Successfully Connected")
 })
 .catch(err=>{
-   console.log("error",err);
 })
 
 

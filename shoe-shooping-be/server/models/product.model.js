@@ -19,7 +19,25 @@ const ProductSchema = new mongoose.Schema({
   },
   quantity:{
     type: Number
-  }
+  },
+  retailer:{
+    type: mongoose.Types.ObjectId,
+    ref:'users',
+    default:null
+  },
+  sku:{
+    type:String
+  },
+  ProductId:{
+    type:String
+  },
+  color:{
+    type:String
+  },
+  size:{
+    type:Number
+  },
+  image:{type:String}
 }, {
   timestamps: true
 });

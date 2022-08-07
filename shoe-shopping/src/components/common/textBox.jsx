@@ -3,7 +3,7 @@ export default function TextBox({ icon, type, name, placeholder, error, callback
     callbackFunction(e);
   }
   return (
-    <div className="wrapper" style={{ marginBottom: "25px" }}>
+    <div className="wrapper" style={{ marginBottom: "25px", textAlign: "left"}}>
       <div className="form-group" style={{ margin: 0 }}>
         <label htmlFor={name}>
           {/* <i className={`zmdi material-icons-name ${icon}`}></i> */}
@@ -18,7 +18,7 @@ export default function TextBox({ icon, type, name, placeholder, error, callback
           onChange={hitCallBackFunction}
         />
       </div>
-      {/* <span className="error">{error}</span> */}
+      <span className="error">{error}</span>
     </div>
   );
 }
