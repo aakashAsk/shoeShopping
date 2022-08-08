@@ -7,6 +7,9 @@ exports.reserveProduct = async (req, res) => {
   console.log(req.body);
   try{
     const user = await userModel.findOne({ _id: req.body.userId })
+    const retailer = await userModel.findOne({ _id: req.body.retailer })
+    const admin = await userModel.findOne({ role: 'admin' })
+    console.log(retailer, admin, user)
     const checkQuantity = await productModel.findOne({
       _id: req.body.productId
     })
@@ -28,33 +31,17 @@ exports.reserveProduct = async (req, res) => {
         })
         .save()
         .then(result => {
-  
-          var transporter = nodemailer.createTransport({
-            service: 'gmail',
-            host: 'smtp.gmail.com',
-            auth: {
-              user: 'shoeShopping1997@gmail.com',
-              pass: 'bdquhnflotwexszv'
-            }
-          });
-          
-          var mailOptions = {
-            from: 'shoeShopping1997@gmail.com',
-            to: user.email,
-            subject: 'Shoe reservation',
-            text: 'Wow, your shoe reservation is completed'
-          };
-          
-          transporter.sendMail(mailOptions, function(error, info){
-            if (error) {
-              console.log(error);
-            } else {
-              res.status(200).send({
-                status: true,
-                message: "Product reserve successfully"
-              })
-            }
-          });
+          let array = [{email:admin.email, text: ''}, {email:retailer.email, text:""}, {email:user.email, text:""}]
+          let promise = []
+          for(let i=0; i<=2; i++){
+            promise.push(sendMail(array[i].email, array[i].text));
+          }
+          Promise.all(promise).then(result => {
+            res.status(200).send({
+              status: true,
+              message: "Product Reserve Successfully"
+            })
+          })
         })
       }
       else{
@@ -71,6 +58,36 @@ exports.reserveProduct = async (req, res) => {
       message: "Something went wrong"
     })
   }
+}
+
+function sendMail(mail, text){
+  let promisesArray = [];
+  promisesArray.push(new Promise((resolve, reject) => {
+    var transporter = nodemailer.createTransport({
+      service: 'gmail',
+      host: 'smtp.gmail.com',
+      auth: {
+        user: 'shoeShopping1997@gmail.com',
+        pass: 'bdquhnflotwexszv'
+      }
+    });
+
+    var mailOptions = {
+      from: 'shoeShopping1997@gmail.com',
+      to: mail,
+      subject: 'Shoe reservation',
+      text: text
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        resolve()
+      }
+    });
+    return promisesArray;
+  }))
 }
 
 exports.getAllReservationByUserId = async (req, res) => {
