@@ -22,7 +22,8 @@ export default function AddProduct() {
     retailer: "",
     image: "",
     color:"",
-    size:""
+    size:"",
+    location:""
   });
 
   let quantityRef = useRef();
@@ -30,22 +31,33 @@ export default function AddProduct() {
   const [quantity, setQuantity] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
   const [productId, setProductId] = useState(false);
+  const [retailerList, setRetailerList] = useState([]);
   const [formError, setFormError] = useState({});
   let [productImg, setProductImg] = useState();
 
   const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
-    getAllProducts();
-    setFormData({ ...formData, retailer: sessionStorage.getItem("token") });
+    // if (sessionStorage.getItem("token")) {
+      getAllProducts();
+      getAllRetailers();
+      setFormData({ ...formData, retailer: sessionStorage.getItem("token") });
+      console.log(retailerList);
+    // }
+    // else{
+    //   window.location.href = '/signin'
+    // }
   }, []);
 
+  function getAllRetailers(){
+    axios.get(`${BASE_URL}getAllUsersAdmin?role=retailer`).then((result) => {
+      setRetailerList(result.data.data);
+    });
+  }
   function getAllProducts() {
     axios
       .get(
-        `${BASE_URL}product/getAllProducts?userid=${sessionStorage.getItem(
-          "token"
-        )}`
+        `${BASE_URL}product/getAllProductsUser`
       )
       .then((result) => {
         setTableData(result.data.result);
@@ -113,6 +125,10 @@ export default function AddProduct() {
     });
   }
 
+  function changeValue(e){
+    setFormData({ ...formData, retailer: e.target.value });
+  }
+
   function validate(values) {
     console.log(values);
     const errors = {};
@@ -170,7 +186,17 @@ export default function AddProduct() {
       errors.sku = "Please enter sku";
     } 
 
-    return errors;
+
+    if (!values.location) {
+      errors.location = "Please enter map url";
+    } 
+    else if (
+      values.location.split("/")[2] != "g.page" ||
+      values.location.split("/").pop().split("?").pop() != "share"
+    ){
+      errors.location = "Please enter valid map url";
+    }
+      return errors;
   }
 
   function updateQuantity(e) {
@@ -216,7 +242,7 @@ export default function AddProduct() {
   }
   return (
     <React.Fragment>
-      <NavBar role="vender" activeTab="addProduct" />
+      <NavBar role="admin" activeTab="addProduct" />
       <ToastContainer />
       <div className="main" style={{ padding: 0 }}>
         <div className="mainPage">
@@ -306,6 +332,32 @@ export default function AddProduct() {
                   placeholder="Please enter sku"
                   value={formData.sku}
                   error={formError.sku}
+                  callbackFunction={handleChange}
+                />
+
+                <select
+                  name="retailer"
+                  id="retailer"
+                  style={{
+                    width: "80%",
+                    padding: "10px",
+                    marginBottom: "15px",
+                  }}
+                  onChange={changeValue}
+                >
+                  {retailerList.length > 0 &&
+                    retailerList.map((i, j) => {
+                      return <option value={i._id}>{i.name}</option>;
+                    })}
+                </select>
+
+                <TextBox
+                  type="text"
+                  icon="map-marker"
+                  name="location"
+                  placeholder="Please enter map url"
+                  value={formData.location}
+                  error={formError.location}
                   callbackFunction={handleChange}
                 />
 

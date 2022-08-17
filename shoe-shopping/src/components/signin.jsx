@@ -64,7 +64,7 @@ export default function Signin(){
             sessionStorage.setItem("token", result.data.token);
             sessionStorage.setItem("userName", result.data.user.name);
             if (role === "user") window.location.href = "/";
-            else if (role === "retailer") window.location.href = "/addProduct";
+            else if (role === "retailer") window.location.href = "/venderProductList";
             else if (role === "admin") window.location.href = "/usersList";
           }
         });

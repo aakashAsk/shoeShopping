@@ -81,7 +81,7 @@ export default function Signup() {
             if(role === 'user')
               window.location.href = "/";
             else if(role==='retailer')  
-              window.location.href = "/addProduct";
+              toast('Wait for admin approve');
             else if(role === 'admin')
               window.location.href = "/"; 
           }

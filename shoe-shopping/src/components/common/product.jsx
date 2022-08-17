@@ -2,6 +2,7 @@ import {useState} from 'react';
 import axios from "axios";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Link } from "react-router-dom";
 const BASE_URL = "http://localhost:4000";
 
 export default function Product({data, showButton=true, callBack}){
@@ -35,26 +36,42 @@ export default function Product({data, showButton=true, callBack}){
     <div className="productBox">
       <ToastContainer />
       <div className="imageBox">
-        <img src={data.image} style={{height: '200px'}}/>
+        <img src={data.image} style={{ height: "200px" }} />
       </div>
       <div className="infoBox">
         <p className="title">{data.title}</p>
-        <p style={{fontWeight: 'bold'}}>Only {data.quantity} remaining</p>
-        <p style={{textTransform: 'capitalize', fontWeight: 'bold'}}>{data.color} Color and {data.size} Size Available</p>
+        <p style={{ fontWeight: "bold" }}>Only {data.quantity} remaining</p>
+        <p style={{ textTransform: "capitalize", fontWeight: "bold" }}>
+          {data.color} Color and {data.size} Size Available
+        </p>
         <div className="priceBox">
           <p className="disPrice" style={{ textDecoration: "line-through" }}>
             &#8377; {data.price}
           </p>
-          <p className="price">
-            &#8377; {data.disPrice}
+          <p className="price">&#8377; {data.disPrice}</p>
+          <p className="ownerName" style={{ marginLeft: "auto" }}>
+            {data.retailer.name}
           </p>
+          {/* <Link
+            className="location"
+            target="_blank" 
+            to={data.location ? data.location : "#"}
+            style={{ margin: "auto" }}
+          >
+            <i class="fa fa-map-marker" aria-hidden="true"></i>
+          </Link> */}
+          <a href={data.location ? data.location : "#"} target="_blank" style={{ margin: "auto" }}>
+            <i class="fa fa-map-marker" aria-hidden="true"></i>
+          </a>
         </div>
       </div>
-      {
-        showButton ? <div className="buttonBox">
-        <button onClick={reserveShoe} className="reserveButton">reserve</button>
-      </div> : null
-      }
+      {showButton ? (
+        <div className="buttonBox">
+          <button onClick={reserveShoe} className="reserveButton">
+            reserve
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

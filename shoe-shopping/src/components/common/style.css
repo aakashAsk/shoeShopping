@@ -239,12 +239,18 @@ tr:nth-child(even) {
   position: absolute;
     width: calc(66% - 20px);
     height: auto;
-    bottom: -7px;
+    top: 59px;
     background: #eae4e4;
     padding: 5px 10px;
 }
 .resultSearch{
 
+}
+.location{
+  display: flex;
+  cursor: pointer;
+    align-items: flex-end;
+    margin-bottom: 5px;
 }
 
 .userIcon{display: flex;

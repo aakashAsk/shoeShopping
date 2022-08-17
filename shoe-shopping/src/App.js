@@ -9,6 +9,7 @@ import ShowReservation from './components/showReservation';
 import UsersList from './components/usersList';
 import RetailersList from './components/retailersList';
 import ShowReservationAdmin from './components/showReservationAdmin';
+import VenderProductLists from './components/venderProductLists';
 import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/addProduct" element={<AddProduct />} />
+          <Route path="/venderProductLists" element={<VenderProductLists />} />
           <Route path="/reservation" element={<Reservation />} />
           <Route path="/productList" element={<ProductList />} />
           <Route path="/showReservation" element={<ShowReservation />} />

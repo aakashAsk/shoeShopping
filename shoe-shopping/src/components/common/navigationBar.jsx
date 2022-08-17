@@ -136,10 +136,10 @@ export default function NavBar({role="user", activeTab}) {
             <ul className="navList">
               <li>
                 <Link
-                  className={activeTab === "addProduct" ? "active" : ""}
-                  to="/addProduct"
+                  className={activeTab === "venderProductList" ? "active" : ""}
+                  to="/venderProductLists"
                 >
-                  Add Product
+                  Product List
                 </Link>
               </li>
               <li>
@@ -170,6 +170,14 @@ export default function NavBar({role="user", activeTab}) {
               </li>
               <li>
                 <Link
+                  className={activeTab === "addProduct" ? "active" : ""}
+                  to="/addProduct"
+                >
+                  Add Product
+                </Link>
+              </li>
+              <li>
+                <Link
                   className={activeTab === "retailersList" ? "active" : ""}
                   to="/retailersList"
                 >
@@ -194,11 +202,20 @@ export default function NavBar({role="user", activeTab}) {
             </ul>
           ) : null}
 
-          {sessionStorage.getItem("token") ? <div className="userIcon">
-            <a title={sessionStorage.getItem("userName")} className="" href="javascript:void(0)">
-              <img src="/images/useriIcon.png"  style={{height:'25px', width:'25px'}}/>
-            </a>
-          </div> : null}
+          {sessionStorage.getItem("token") ? (
+            <div className="userIcon">
+              <a
+                title={sessionStorage.getItem("userName")}
+                className=""
+                href="javascript:void(0)"
+              >
+                <img
+                  src="/images/useriIcon.png"
+                  style={{ height: "25px", width: "25px" }}
+                />
+              </a>
+            </div>
+          ) : null}
         </nav>
       </div>
     </div>
