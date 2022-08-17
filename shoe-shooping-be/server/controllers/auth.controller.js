@@ -90,7 +90,7 @@ exports.approveOrRejectRetailer = async (req, res) => {
         UserModel.findOneAndUpdate({ _id: req.body.id }, { adminApprove : req.body.status})
             .then(result => {
                 return res.status(200).json({
-                    message: 'Retailer approve successfully',
+                    message: `Retailer ${req.body.status ? 'approve' : 'rejected'} successfully`,
                     status: true,
                     data: result
                 });
@@ -100,3 +100,5 @@ exports.approveOrRejectRetailer = async (req, res) => {
 
     }
 }
+
+

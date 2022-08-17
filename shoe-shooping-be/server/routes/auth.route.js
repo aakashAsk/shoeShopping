@@ -7,6 +7,7 @@ router.post('/signup', autController.signup)
 router.post('/signin', autController.signin)
 router.get('/getAllUsersAdmin', autController.getAllUsersAdmin)
 router.post('/approveOrRejectRetailer', autController.approveOrRejectRetailer)
+// router.post('/getRetailersList', autController.getRetailersList)
 
 
 module.exports = router

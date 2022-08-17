@@ -37,7 +37,7 @@ exports.getAllProducts = (req, res) => {
 exports.getAllProductsUser = (req, res) => {
   // try {
     if (req.query.title){
-      productModel.findOne({ title: req.query.title })
+      productModel.findOne({ title: req.query.title }).populate('retailer')
         .then(result => {
           res.status(200).send({
             status: true,
@@ -47,7 +47,7 @@ exports.getAllProductsUser = (req, res) => {
         })
     }
     else{
-      productModel.find()
+      productModel.find().populate('retailer')
       .then(result => {
         res.status(200).send({
           status: true,
